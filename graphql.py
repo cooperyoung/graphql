@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "https://graphql-catalog.app.iherb.com/sdfxghjk"
+url = "https://graphql-catalog.app.iherb.com/"
 
 query = '''
     query {
