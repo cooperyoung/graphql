@@ -17,13 +17,24 @@ class Field:
         }                       # dictionary used to classfy subiems
         self.locations = []     # not sure what this is used for (array of strings)
 
+class ErrorMessage:
+    def __init__(self):
+        self.guessed_word          # string
+        self.real_word             # string
+        self.arg                   # string
+        self.arg_type              # string
+        self.real_word_type        # string
+        self.real_word_subfields   # boolean
+
 url = "https://graphql-catalog.app.iherb.com/"
 
 query = '''
     query {
-        pser(id: "admin") {
-            id
-        }
+        blog(id:1) {
+            name
+        },
+        account,
+        user
     }
 '''
 
@@ -36,14 +47,9 @@ headers = {
 }
 
 response = requests.post(url, data=json.dumps(payload), headers=headers)
-
-# print(response.json())
-# {'errors': [{'message': 'Cannot query field "pser" on type "Query". Did you mean "user"?', 'locations': [{'line': 3, 'column': 9}], 'extensions': {'code': 'GRAPHQL_VALIDATION_FAILED'}}]}
-
-response_string = json.dumps(response.json())
-response_json = json.loads(response_string)
+print(response.json())
 
 # Extract the suggestion from the error message
-error_message = response_json["errors"][0]["message"]
-suggestion = error_message.split("Did you mean ")[1].strip(" '?")
-print(suggestion)
+# error_message = response_json["errors"][0]["message"]
+# suggestion = error_message.split("Did you mean ")[1].strip(" '?")
+# print(suggestion)
