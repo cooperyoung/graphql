@@ -1,16 +1,17 @@
 import requests
 import json
+import re
 
 # Class to keep track of Fields in the graphql schema
 class Field:
     def __init__(self, Name):
-        self.kind   #Str         # kimd of Field            ex: SCALAR  or  OBJECT  or  NON_NULL
+        self.kind = None   #Str         # kind of Field            ex: SCALAR  or  OBJECT  or  NON_NULL
         self.name = Name         # String name of Field            ex: User
         self.args = []           # list of arguments        ex: User (id: xx)    id is an args
-        self.description  #Str   # description of Field      
+        self.description = None  #Str   # description of Field      432q     sa
         self.subfields = []      #
-        self.isDeprecated        # Boolean
-        self.deprecationReason = "null"         # change if isDeprecated == True
+        self.isDeprecated = False        # Boolean
+        self.deprecationReason = None         # change if isDeprecated == True
         self.type = {
             "kind",
             "name",
@@ -20,13 +21,15 @@ class Field:
 
 # Class to extract useful data from error messages
 class ErrorMessage:
-    def __init__(self):
-        self.guessed_word          # string
-        self.real_word             # string
-        self.arg                   # string
-        self.arg_type              # string
-        self.real_word_type        # string
-        self.real_word_subfields   # boolean
+    def __init__(self, error_message):
+        self.guessed_word = None         # string
+        self.real_word = None             # string
+        self.arg = None                  # string
+        self.arg_type = None              # string
+        self.real_word_type = None        # string
+        self.real_word_subfields = None   # boolean
+        self.message = error_message
+        
 
 # URL that we want to query                              -- this will later be a user input  
 url = "https://graphql-catalog.app.iherb.com/"
@@ -46,7 +49,7 @@ headers = {
 }
 
 response = requests.post(url, data=json.dumps(payload), headers=headers)
-print(response.json())
+json_response = response.json()
 
 # Examples of Error Messages:
     # 'message': 'Cannot query field "account" on type "Query".'
@@ -55,23 +58,18 @@ print(response.json())
     # 'message': 'Field "user" of type "User" must have a selection of subfields. Did you mean "user { ... }"?'
     # blank if a field is found but there are other errors
 
-# How to extract the suggestion from the error message: 
-    # error_message = response_json["errors"][0]["message"]
-    # suggestion = error_message.split("Did you mean ")[1].strip(" '?")
-    # print(suggestion)
-
 
 field_list = [Field]
 
 # Psudo code:
+i = 0                                       # set a counter to 0
 
-# load a .txt file of words and call it word_list
+for error in json_response['errors']:
+    print(error['message'])
+    current_guess = word_list[i]            # update the current guessed word
+    current_error_message = ErrorMessage(error['message'])  # initialize ErrorMessage class
 
-# i = 0                                       # set a counter to 0
-# for error_message in response:              # range through the 'messages' in response (range n in response_json["errors"][n]["message"])
-#     current_guess = word_list[i]            # update the current guessed word
-#     current_error_message = ErrorMessage()  # initialize ErrorMessage class
-#     current_error_message.process()         # call a function to populate ErrorMessage class variabes
+#    current_error_message.process()         # call a function to populate ErrorMessage class variabes
 #                                                     # ex: real_word = error_message.split("Did you mean ")[1].strip(" '?")
 #     while(current_guess != current_error_message.guessed_word):  # while the error message word isn't the 
 #         new_field = Field(word_list[i])     # create a Field from the current_guess (no error means its a field)
