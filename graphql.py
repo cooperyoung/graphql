@@ -31,9 +31,10 @@ class ErrorMessage:
         self.real_word_subfields = None   # boolean
         self.message = error_message
     
+    # process() extracts important info out of the ErrorMessage and updates the class parameters
     def process(self):
         pattern4 = r'Field "(.*?)" argument "(.*?)" of type "(.*?)!" is required, but it was not provided\.'
-        pattern3 = r'Field "(.*?)" of type ".*?" must have a selection of subfields\. Did you mean "(.*?) {.*?}"\?'
+        pattern3 = r'Field "(.*?)" of type ".*?" must have a selection of subfields\. Did you mean "(.*?) { ... }"\?'
         pattern2 = r'Cannot query field "(.*?)" on type "Query". Did you mean "(.*?)"\?'
         pattern1 = r'Cannot query field "(.*?)" on type "Query"\.'
         if re.match(pattern4, self.message):
@@ -41,12 +42,13 @@ class ErrorMessage:
             self.guessed_word = key_words.group(1)
             self.arg = key_words.group(2)
             self.arg_type = key_words.group(3)
-            print(self.arg_type)
+            print(self.guessed_word)
         elif re.match(pattern3, self.message):
             key_words = re.search(pattern3, self.message)
             self.guessed_word = key_words.group(1)
             self.real_word_type = key_words.group(2)
             self.real_word_subfields = True
+            print(self.guessed_word)
         elif re.match(pattern2, self.message):
             key_words = re.search(pattern2, self.message)
             self.guessed_word = key_words.group(1)
@@ -87,7 +89,7 @@ json_response = response.json()
     # blank if a field is found but there are other errors
 
 
-field_list = [Field]
+field_list = []
 
 # Psudo code:
 i = 0                                       # set a counter to 0
@@ -97,15 +99,15 @@ for error in json_response['errors']:
     current_guess = word_list[i]            # update the current guessed word
     current_error_message = ErrorMessage(error['message'])  # initialize ErrorMessage class
     current_error_message.process()         # call a function to populate ErrorMessage class variabes
+    
+    # The only reason the following doesn't work is that we aren't increasing i in the right place yet 
+    # (ex: user appears twice as the guessed_word)
 
     # while(current_guess != current_error_message.guessed_word):  # while the error message word isn't the 
     #     new_field = Field(word_list[i])     # create a Field from the current_guess (no error means its a field)
     #     field_list.insert(0, new_field)        # add new field to list
     #     i += 1                              # increase counter by 1
 
-test = len(field_list)
-print(f'length of field_list is: {test}')
-#     # by now the current_guess should == current_error_message.guessed_word
 
 #     if (current_error_message.real_word is not None):    # if the error message reveals a real word
 #         new_field = current_error_message.guessed_word   # make a new field and add relevent info (args/subfields/etc)
